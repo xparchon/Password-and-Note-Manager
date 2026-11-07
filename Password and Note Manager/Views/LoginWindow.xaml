@@ -1,0 +1,37 @@
+﻿<Window x:Class="Password_and_Note_Manager.Views.LoginWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Login - Password Manager" Height="420" Width="450" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
+    <Grid Margin="30">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Título -->
+        <TextBlock Grid.Row="0" Text="🔐 Unlock Vault" FontSize="22" FontWeight="Bold" Foreground="#0F172A" Margin="0,0,0,15"/>
+
+        <!-- SELETOR DE MODO (Local vs Nuvem) -->
+        <StackPanel Grid.Row="1" Margin="0,0,0,20">
+            <TextBlock Text="Access Mode:" FontWeight="SemiBold" Foreground="#475569" Margin="0,0,0,5"/>
+            <ComboBox x:Name="cmbStorageMode" Height="32" VerticalContentAlignment="Center" SelectionChanged="CmbStorageMode_SelectionChanged">
+                <ComboBoxItem Content="📁 Local Vault (This PC)" IsSelected="True"/>
+                <ComboBoxItem Content="☁️ Microsoft Account (OneDrive)"/>
+                <ComboBoxItem Content="🌐 Google Account (Google Drive)"/>
+            </ComboBox>
+        </StackPanel>
+
+        <!-- FORMULÁRIO DE SENHA MESTRE -->
+        <StackPanel Grid.Row="2" VerticalAlignment="Top">
+            <TextBlock Text="Master Password" FontWeight="SemiBold" Foreground="#475569" Margin="0,0,0,5"/>
+            <PasswordBox x:Name="txtMasterPassword" Height="32" VerticalContentAlignment="Center" Padding="5,0" Margin="0,0,0,10" KeyDown="TxtMasterPassword_KeyDown"/>
+
+            <!-- Mensagem de Erro ou Status -->
+            <TextBlock x:Name="lblErrorMessage" Foreground="Red" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,15"/>
+
+            <!-- Botão de Ação Dinâmico -->
+            <Button x:Name="btnLogin" Content="Open Vault" Height="38" Background="#2563EB" Foreground="White" FontWeight="Bold" BorderThickness="0" Cursor="Hand" Click="BtnLogin_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>
