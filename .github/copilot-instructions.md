@@ -1,0 +1,2 @@
+- Always write Git commit messages in English.
+- Follow the Conventional Commits format (e.g., feat, fix, refactor, docs).
