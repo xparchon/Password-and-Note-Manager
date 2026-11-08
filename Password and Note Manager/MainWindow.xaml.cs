@@ -239,8 +239,8 @@ namespace Password_and_Note_Manager
         // 7. Logout and return to the login screen, clearing the current vault session
         private void BtnLogout_Click(object sender, RoutedEventArgs e)
         {
-            var result = MessageBox.Show("Deseja fechar o cofre atual e voltar à tela de login?",
-                                         "Trocar Cofre",
+            var result = MessageBox.Show("Do you want to close the current vault and return to the login screen?",
+                                         "Change Vault",
                                          MessageBoxButton.YesNo,
                                          MessageBoxImage.Question);
 
