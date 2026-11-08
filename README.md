@@ -80,22 +80,53 @@ To enable cloud synchronization, follow the step-by-step guides below to create 
 
 ## 🛠️ Environment Variables Setup on Windows
 
-The application retrieves credentials directly from your operating system environment variables. You need to register the required variables on your machine before running the application.
+The application retrieves credentials directly from your operating system environment variables. You can register these variables using the command terminal or the Windows Graphical User Interface (GUI).
 
-### Using Command Prompt (CMD) or PowerShell
-Open your terminal and execute the commands below (replace the text inside quotes with your actual credentials):
+### Option A: Using Terminal (CMD or PowerShell)
+
+#### Command Prompt (CMD)
+Open Command Prompt and execute the following commands (replace the placeholder text with your actual credentials):
 
 ```cmd
 setx GOOGLE_CLIENT_ID "YOUR_GOOGLE_CLIENT_ID_HERE.apps.googleusercontent.com"
 setx GOOGLE_CLIENT_SECRET "YOUR_GOOGLE_CLIENT_SECRET_HERE"
 setx ONEDRIVE_CLIENT_ID "YOUR_AZURE_CLIENT_ID_HERE"
+```
 
+#### PowerShell
+Open PowerShell and run:
 
+```powershell
+[System.Environment]::SetEnvironmentVariable("GOOGLE_CLIENT_ID", "YOUR_GOOGLE_CLIENT_ID_HERE.apps.googleusercontent.com", "User")
+[System.Environment]::SetEnvironmentVariable("GOOGLE_CLIENT_SECRET", "YOUR_GOOGLE_CLIENT_SECRET_HERE", "User")
+[System.Environment]::SetEnvironmentVariable("ONEDRIVE_CLIENT_ID", "YOUR_AZURE_CLIENT_ID_HERE", "User")
+```
 
+> **Note:** After running the commands above, restart your IDE (Visual Studio) or terminal for the new environment variables to be recognized.
+
+---
+
+### Option B: Using Windows Graphical Interface (GUI)
+
+1. Press `Win + R`, type `sysdm.cpl`, and press **Enter** (or search for *"Edit the system environment variables"* in the Windows Start Menu).
+2. Go to the **Advanced** tab and click **Environment Variables...** at the bottom.
+3. Under the **User variables for [Your Username]** section (top pane), click **New...**:
+   - **Variable name:** `GOOGLE_CLIENT_ID`
+   - **Variable value:** `YOUR_GOOGLE_CLIENT_ID_HERE.apps.googleusercontent.com`
+4. Click **OK**, then click **New...** again for the next variable:
+   - **Variable name:** `GOOGLE_CLIENT_SECRET`
+   - **Variable value:** `YOUR_GOOGLE_CLIENT_SECRET_HERE`
+5. Click **OK**, then click **New...** again:
+   - **Variable name:** `ONEDRIVE_CLIENT_ID`
+   - **Variable value:** `YOUR_AZURE_CLIENT_ID_HERE`
+6. Click **OK** on all open windows to save the changes.
+
+---
+---
 
 PORTUGUÊS (PT-BR)
 
-O Password and Note Manager (PNM) é um aplicativo desktop seguro desenvolvido em C# e WPF para o gerenciamento local de senhas e notas criptografadas, com suporte a backup e sincronização via Google Drive e OneDrive.
+O **Password and Note Manager (PNM)** é um aplicativo desktop seguro desenvolvido em C# e WPF para o gerenciamento local de senhas e notas criptografadas, com suporte a backup e sincronização via Google Drive e OneDrive.
 
 ---
 
@@ -173,12 +204,43 @@ Para ativar a sincronização em nuvem, siga os guias passo a passo abaixo para 
 
 ## 🛠️ Configuração de Variáveis de Ambiente no Windows
 
-O aplicativo obtém as credenciais diretamente das variáveis de ambiente do seu sistema operacional. Você precisa registrar as variáveis necessárias na sua máquina antes de executar o aplicativo.
+O aplicativo obtém as credenciais diretamente das variáveis de ambiente do seu sistema operacional. Você pode registrar essas variáveis via terminal de comando ou através da Interface Gráfica do Windows.
 
-### Utilizando o Prompt de Comando (CMD) ou PowerShell
-Abra o seu terminal e execute os comandos abaixo (substitua o texto entre aspas pelas suas credenciais reais):
+### Opção A: Via Terminal (CMD ou PowerShell)
+
+#### Prompt de Comando (CMD)
+Abra o Prompt de Comando e execute os comandos abaixo (substitua o texto entre aspas pelas suas credenciais reais):
 
 ```cmd
 setx GOOGLE_CLIENT_ID "SEU_GOOGLE_CLIENT_ID_AQUI.apps.googleusercontent.com"
 setx GOOGLE_CLIENT_SECRET "SUA_CHAVE_SECRETA_GOOGLE_AQUI"
 setx ONEDRIVE_CLIENT_ID "SEU_AZURE_CLIENT_ID_AQUI"
+```
+
+#### PowerShell
+Abra o PowerShell e execute:
+
+```powershell
+[System.Environment]::SetEnvironmentVariable("GOOGLE_CLIENT_ID", "SEU_GOOGLE_CLIENT_ID_AQUI.apps.googleusercontent.com", "User")
+[System.Environment]::SetEnvironmentVariable("GOOGLE_CLIENT_SECRET", "SUA_CHAVE_SECRETA_GOOGLE_AQUI", "User")
+[System.Environment]::SetEnvironmentVariable("ONEDRIVE_CLIENT_ID", "SEU_AZURE_CLIENT_ID_AQUI", "User")
+```
+
+> **Nota:** Após executar os comandos acima, reinicie a sua IDE (Visual Studio) ou terminal para que as novas variáveis de ambiente sejam reconhecidas pela aplicação.
+
+---
+
+### Opção B: Via Interface Gráfica do Windows (GUI)
+
+1. Pressione `Win + R`, digite `sysdm.cpl` e pressione **Enter** (ou pesquise por *"Editar as variáveis de ambiente do sistema"* no Menu Iniciar).
+2. Vá até a aba **Avançado** e clique no botão **Variáveis de Ambiente...** na parte inferior.
+3. Na seção **Variáveis do usuário para [Seu Nome de Usuário]** (painel superior), clique em **Nova...**:
+   - **Nome da variável:** `GOOGLE_CLIENT_ID`
+   - **Valor da variável:** `SEU_GOOGLE_CLIENT_ID_AQUI.apps.googleusercontent.com`
+4. Clique em **OK**, e depois clique em **Nova...** novamente para a próxima variável:
+   - **Nome da variável:** `GOOGLE_CLIENT_SECRET`
+   - **Valor da variável:** `SUA_CHAVE_SECRETA_GOOGLE_AQUI`
+5. Clique em **OK**, e clique em **Nova...** mais uma vez:
+   - **Nome da variável:** `ONEDRIVE_CLIENT_ID`
+   - **Valor da variável:** `SEU_AZURE_CLIENT_ID_AQUI`
+6. Clique em **OK** em todas as janelas abertas para salvar as alterações.
