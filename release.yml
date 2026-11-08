@@ -1,0 +1,34 @@
+name: Publicar Release no GitHub
+
+on:
+  push:
+    tags:
+      - 'v*' # Aciona automaticamente sempre que você envia uma tag iniciada com 'v' (ex: v1.0.0)
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest # Roda em ambiente Windows para compilar o WPF perfeitamente
+
+    steps:
+    - name: Clonar Repositório
+      uses: actions/checkout@v4
+
+    - name: Configurar o .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x' # Alinhado com a versão do .NET do seu projeto
+
+    - name: Publicar Projeto (Autocontido para Windows x64)
+      run: dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -o ./publish_output
+
+    - name: Compactar Arquivos em ZIP
+      run: Compress-Archive -Path ./publish_output/* -DestinationPath ./PNM-win-x64.zip
+
+    - name: Criar Release e Enviar Arquivo
+      uses: softprops/action-gh-release@v2
+      with:
+        files: ./PNM-win-x64.zip
+        draft: false
+        prerelease: true # Deixe como true se for uma versão alpha/beta, ou false para estável
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
