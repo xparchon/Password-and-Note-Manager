@@ -1,0 +1,38 @@
+name: Publicar Release no GitHub
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+# Permissões necessárias para publicar arquivos na Release
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    steps:
+    - name: Clonar Repositório
+      uses: actions/checkout@v4
+
+    - name: Configurar o .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
+
+    - name: Publicar Projeto
+      run: dotnet publish -c Release -r win-x64 --self-contained true -o ./publish_output
+
+    - name: Compactar Arquivos em ZIP
+      run: Compress-Archive -Path ./publish_output/* -DestinationPath ./PNM-win-x64.zip
+
+    - name: Criar Release e Enviar Arquivo
+      uses: softprops/action-gh-release@v2
+      with:
+        files: ./PNM-win-x64.zip
+        draft: false
+        prerelease: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
