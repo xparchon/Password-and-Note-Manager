@@ -21,7 +21,7 @@ namespace Password_and_Note_Manager.Helpers
             if (useSpecials) charSet.Append(Specials);
 
             if (charSet.Length == 0)
-                throw new ArgumentException("Selecione pelo menos um conjunto de caracteres.");
+                throw new ArgumentException("Select at least one character set.");
 
             char[] chars = charSet.ToString().ToCharArray();
             byte[] data = new byte[length];

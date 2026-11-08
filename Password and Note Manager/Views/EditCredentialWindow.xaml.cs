@@ -18,7 +18,7 @@ namespace Password_and_Note_Manager.Views
             _credential = credential;
             _masterKey = masterKey;
 
-            // Preenche os campos com os dados atuais
+            // Fill the fields with the current data
             txtTitle.Text = _credential.Title;
             txtWebsite.Text = _credential.WebsiteUrl;
             txtUsername.Text = _credential.Username;
@@ -26,7 +26,7 @@ namespace Password_and_Note_Manager.Views
 
             try
             {
-                // Descriptografa a senha para exibição no campo de edição
+                // Decrypt the password for display in the edit field
                 txtPassword.Text = CryptoHelper.Decrypt(_credential.EncryptedPassword, _masterKey);
             }
             catch
@@ -35,17 +35,18 @@ namespace Password_and_Note_Manager.Views
             }
         }
 
+        // Saves the updated credential to the database
         private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtTitle.Text) || string.IsNullOrWhiteSpace(txtUsername.Text) || string.IsNullOrWhiteSpace(txtPassword.Text))
             {
-                MessageBox.Show("Preencha os campos obrigatórios.", "Aviso", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Please fill in the required fields.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
             try
             {
-                // Criptografa novamente a senha atualizada
+                // Encrypt the new password
                 string encryptedPassword = CryptoHelper.Encrypt(txtPassword.Text, _masterKey);
 
                 using (var connection = DatabaseHelper.GetConnection())
@@ -72,7 +73,7 @@ namespace Password_and_Note_Manager.Views
             }
             catch(Exception ex)
             {
-                MessageBox.Show($"Erro ao atualizar a credencial: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Error updating the credential: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }

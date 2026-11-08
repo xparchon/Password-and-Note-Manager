@@ -11,7 +11,7 @@ namespace Password_and_Note_Manager
         {
             base.OnStartup(e);
 
-            // Inicializa o cofre padrão ao arrancar a aplicação
+            // Initialize the default vault when the application starts
             DatabaseHelper.InitializeDatabase();
         }
 

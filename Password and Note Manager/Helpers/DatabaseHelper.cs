@@ -6,10 +6,10 @@ namespace Password_and_Note_Manager.Helpers
 {
     public static class DatabaseHelper
     {
-        // Nome padrão do cofre, que pode ser alterado dinamicamente (ex: vault_local.db, vault_onedrive.db)
+        // Default vault name and dynamic update (ex: vault_local.db, vault_onedrive.db)
         public static string CurrentDbName { get; set; } = "vault.db";
 
-        // String de conexão dinâmica mantendo o modo WAL ativo
+        // Dynamic connection string maintaining WAL mode active
         private static string ConnectionString => $"Data Source={CurrentDbName};Version=3;journal_mode=WAL;";
 
         // Ensures that the database file and essential tables exist whenever any part of the app requests a connection

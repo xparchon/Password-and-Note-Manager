@@ -13,6 +13,7 @@ namespace Password_and_Note_Manager.Views
             InitializeComponent();
         }
 
+        // Handles the login button click event, validating the master password and managing storage modes
         private async void BtnLogin_Click(object sender, RoutedEventArgs e)
         {
             string password = txtMasterPassword.Password;
@@ -24,23 +25,23 @@ namespace Password_and_Note_Manager.Views
                 return;
             }
 
-            // Desativa o botão no início
+            // Disable the button at the beginning
             btnLogin.IsEnabled = false;
 
             try
             {
                 bool canProceed = true;
 
-                // 1. SE O MODO FOR LOCAL (Índice 0)
+                // 1. If using local mode (Index 0)
                 if (cmbStorageMode != null && cmbStorageMode.SelectedIndex == 0)
                 {
                     DatabaseHelper.CurrentDbName = "vault_local.db";
                     canProceed = true;
                 }
-                // 2. SE O MODO FOR MICROSOFT ONEDRIVE (Índice 1)
+                // 2. If using Microsoft OneDrive mode (Index 1)
                 else if (cmbStorageMode != null && cmbStorageMode.SelectedIndex == 1)
                 {
-                    // Obtém o e-mail para criar um cofre único por conta
+                    // Gets the email to create a unique vault per account
                     string email = null;
                     try
                     {
@@ -57,7 +58,7 @@ namespace Password_and_Note_Manager.Views
 
                     try
                     {
-                        // Se o cofre local não existir, cria a estrutura básica localmente antes de sincronizar
+                        // If the local vault does not exist, create the basic structure locally before synchronizing
                         bool localExists = System.IO.File.Exists(localDbPath);
                         if (!localExists)
                         {
@@ -99,7 +100,7 @@ namespace Password_and_Note_Manager.Views
                             }
                         }
 
-                        // Executa a sincronização inteligente (compara datas entre o PC e o OneDrive na pasta approot)
+                        // Execute the smart synchronization (compares dates between the PC and OneDrive in the approot folder)
                         await OneDriveHelper.SynchronizeVaultAsync(localDbPath);
 
                         if (System.IO.File.Exists(localDbPath))
@@ -129,10 +130,10 @@ namespace Password_and_Note_Manager.Views
                         }
                     }
                 }
-                // 3. SE O MODO FOR GOOGLE DRIVE (Índice 2)
+                // 3. If using Google Drive mode (Index 2)
                 else if (cmbStorageMode != null && cmbStorageMode.SelectedIndex == 2)
                 {
-                    // Obtém o e-mail para criar um cofre único por conta
+                    // Gets the email to create a unique vault per account
                     string email = null;
                     try { email = await GoogleDriveHelper.GetUserEmailAsync(); } catch { }
                     string safeIdentifier = !string.IsNullOrEmpty(email) ? email.Replace("@", "_").Replace(".", "_") : "default";
@@ -232,7 +233,7 @@ namespace Password_and_Note_Manager.Views
                     DatabaseHelper.CurrentDbName = "vault_local.db";
                 }
 
-                // Validação e carregamento do cofre correspondente
+                // Validation and loading of the corresponding vault
                 if (canProceed)
                 {
                     using (var connection = DatabaseHelper.GetConnection())
@@ -296,6 +297,7 @@ namespace Password_and_Note_Manager.Views
             }
         }
 
+        // Handles the Enter key press in the master password field to trigger the login process
         private void TxtMasterPassword_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
             if (e.Key == System.Windows.Input.Key.Enter)
@@ -304,6 +306,7 @@ namespace Password_and_Note_Manager.Views
             }
         }
 
+        // Handles the selection change in the storage mode combo box to update the login button text and database name accordingly
         private void CmbStorageMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (cmbStorageMode == null || btnLogin == null) return;
@@ -315,12 +318,10 @@ namespace Password_and_Note_Manager.Views
             }
             else if (cmbStorageMode.SelectedIndex == 1)
             {
-                //DatabaseHelper.CurrentDbName = "vault_onedrive.db";
                 btnLogin.Content = "Sync and Sign In (Microsoft)";
             }
             else if (cmbStorageMode.SelectedIndex == 2)
             {
-                //DatabaseHelper.CurrentDbName = "vault_gdrive.db";
                 btnLogin.Content = "Sync and Sign In (Google)";
             }
         }
@@ -329,7 +330,7 @@ namespace Password_and_Note_Manager.Views
         {
             try
             {
-                // Garante que o ficheiro da base de dados e as tabelas são criadas
+                // Ensures that the database file and essential tables exist whenever any part of the app requests a connection
                 DatabaseHelper.InitializeDatabase();
 
                 string salt = CryptoHelper.GenerateSalt();

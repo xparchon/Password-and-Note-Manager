@@ -19,18 +19,20 @@ namespace Password_and_Note_Manager.Views
             InitializeAsync();
         }
 
+        // Event handler for navigation starting in the WebView2 control
         private void CoreWebView2_NavigationStarting(object sender, CoreWebView2NavigationStartingEventArgs e)
         {
             if (e.Uri.StartsWith(_redirectUri, StringComparison.OrdinalIgnoreCase))
             {
                 e.Cancel = true;
-                RedirectedUrl = e.Uri; // Guarda o URL completo com o parâmetro "code"
+                RedirectedUrl = e.Uri; // Keep the complete URL with the "code" parameter
                 IsLoginSuccessful = true;
                 this.DialogResult = true;
                 this.Close();
             }
         }
 
+        // Initializes the WebView2 control and navigates to the authentication URL
         private async void InitializeAsync()
         {
             await webView.EnsureCoreWebView2Async();

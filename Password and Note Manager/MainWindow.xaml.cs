@@ -1,11 +1,7 @@
 ﻿using Password_and_Note_Manager.Helpers;
 using Password_and_Note_Manager.Models;
-using System;
-using System.Collections.Generic; // Garanta que esta lista está presente
-using System.Linq;
 using System.Data.SQLite;
 using System.IO;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -20,8 +16,8 @@ namespace Password_and_Note_Manager
         {
             InitializeComponent();
             _masterKey = masterKey;
-            CheckVaultHash(); // Verifica a integridade do cofre ao abrir a tela
-            // Carrega as senhas do banco logo após a abertura da tela
+            CheckVaultHash(); // Verify the integrity of the vault when opening the screen
+            // Load the passwords from the database right after the screen is opened
             LoadCredentials();
         }
 
@@ -29,10 +25,10 @@ namespace Password_and_Note_Manager
         {
             try
             {
-                // Verifica qual cofre está ativo e executa a lógica correspondente
+                // Verifies which vault is active and executes the corresponding logic
                 if (DatabaseHelper.CurrentDbName == "vault_onedrive.db")
                 {
-                    // Sincroniza apenas se for OneDrive
+                    // Synchronize with OneDrive
                     Task.Run(async () =>
                     {
                         string localVaultPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, DatabaseHelper.CurrentDbName);
@@ -41,7 +37,7 @@ namespace Password_and_Note_Manager
                 }
                 else if (DatabaseHelper.CurrentDbName == "vault_gdrive.db")
                 {
-                    // Sincroniza apenas se for Google Drive
+                    // Synchronize with Google Drive
                     Task.Run(async () =>
                     {
                         string localVaultPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, DatabaseHelper.CurrentDbName);
@@ -50,8 +46,8 @@ namespace Password_and_Note_Manager
                 }
                 else
                 {
-                    // Modo Local (vault_local.db ou vault.db): Apenas opera localmente, sem chamadas à nuvem
-                    // Nenhuma ação extra necessária aqui.
+                    // Local Mode (vault_local.db or vault.db): Only operates locally, without calls to the cloud
+                    // No extra action needed here.
                 }
             }
             catch (Exception ex)
@@ -60,7 +56,7 @@ namespace Password_and_Note_Manager
             }
         }
 
-        // 1. Carrega e lista as credenciais na barra lateral esquerda
+        // 1. Load and list the credentials in the left sidebar
         private void LoadCredentials()
         {
             _credentialsList.Clear();
@@ -91,18 +87,19 @@ namespace Password_and_Note_Manager
             lstCredentials.ItemsSource = _credentialsList;
         }
 
+        // 2. Search and filter the credentials in real-time based on Title or Username
         private void TxtSearch_TextChanged(object sender, TextChangedEventArgs e)
         {
             string searchText = txtSearch.Text.Trim().ToLower();
 
             if (string.IsNullOrEmpty(searchText))
             {
-                // Se a pesquisa estiver vazia, exibe todas as credenciais
+                // If the search is empty, display all credentials
                 lstCredentials.ItemsSource = _credentialsList;
             }
             else
             {
-                // Filtra a lista com base no Título ou no Username em tempo real
+                // Filter the list based on Title or Username in real-time
                 var filteredList = _credentialsList
                     .Where(c => (c.Title != null && c.Title.ToLower().Contains(searchText)) ||
                                 (c.Username != null && c.Username.ToLower().Contains(searchText)))
@@ -112,12 +109,12 @@ namespace Password_and_Note_Manager
             }
         }
 
-        // Evento de seleção da lista lateral
+        // 3. When a credential is selected, display its details on the right side of the screen
         private void LstCredentials_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (lstCredentials.SelectedItem is Credential selected)
             {
-                // Torna o painel de detalhes visível
+                // Show details panel
                 pnlDetails.Visibility = Visibility.Visible;
 
                 lblSelectedTitle.Text = selected.Title;
@@ -125,30 +122,30 @@ namespace Password_and_Note_Manager
                 txtDisplayUsername.Text = selected.Username;
                 txtDisplayNotes.Text = selected.Notes;
 
-                // Reseta a exibição para formato oculto ao trocar de item
+                // Reset the display to hidden format when changing items
                 selected.IsPasswordRevealed = false;
                 btnShowPassword.Content = "Reveal";
                 txtDisplayPassword.Text = "••••••••••••";
             }
             else
             {
-                // Oculta o painel se nenhum item estiver selecionado
+                // Hide the panel if no item is selected
                 pnlDetails.Visibility = Visibility.Collapsed;
                 lblSelectedTitle.Text = "Select an item from the list";
                 lblSelectedUrl.Text = string.Empty;
             }
         }
 
-        // Evento do botão de adicionar nova senha
+        // 4. Open the Add Credential window to allow the user to add a new credential
         private void BtnNewCredential_Click(object sender, RoutedEventArgs e)
         {
-            // Instancia a janela de inserção passando a chave mestre para criptografia
+            // Instantiate the add credential window, passing the master key for encryption
             Views.AddCredentialWindow addWindow = new Views.AddCredentialWindow(_masterKey);
-            addWindow.Owner = this; // Centraliza a tela filha em cima da tela principal
+            addWindow.Owner = this; // Center the child window over the main window
 
             addWindow.ShowDialog();
 
-            // Se o usuário adicionou pelo menos uma credencial durante a sessão, atualiza a lista ao fechar
+            // If the user added at least one credential during the session, update the list when closing
             if (addWindow.HasAddedCredentials)
             {
                 LoadCredentials();
@@ -156,14 +153,14 @@ namespace Password_and_Note_Manager
             }
         }
 
-        // Evento do botão de revelar/ocultar senha
+        // 5. Reveal or hide the password of the selected credential in real-time
         private void BtnShowPassword_Click(object sender, RoutedEventArgs e)
         {
             if (lstCredentials.SelectedItem is Credential selected)
             {
                 if (selected.IsPasswordRevealed)
                 {
-                    // Oculta novamente
+                    // Hide again
                     txtDisplayPassword.Text = "••••••••••••";
                     btnShowPassword.Content = "Reveal";
                     selected.IsPasswordRevealed = false;
@@ -172,7 +169,7 @@ namespace Password_and_Note_Manager
                 {
                     try
                     {
-                        // Descriptografa em tempo real usando a CryptoHelper e a chave mestre logada
+                        // Decrypt in real-time using the CryptoHelper and the logged-in master key
                         string decrypted = CryptoHelper.Decrypt(selected.EncryptedPassword, _masterKey);
                         txtDisplayPassword.Text = decrypted;
                         btnShowPassword.Content = "Hide";
@@ -186,6 +183,7 @@ namespace Password_and_Note_Manager
             }
         }
 
+        // 6. Delete the selected credential from the database and update the list
         private void BtnDeleteCredential_Click(object sender, RoutedEventArgs e)
         {
             if (lstCredentials.SelectedItem is Credential selected)
@@ -225,7 +223,7 @@ namespace Password_and_Note_Manager
         {
             if (lstCredentials.SelectedItem is Credential selected)
             {
-                // Abre a janela de edição passando o item selecionado e a chave mestre
+                // Open the edit window passing the selected item and the master key
                 Views.EditCredentialWindow editWindow = new Views.EditCredentialWindow(selected, _masterKey);
                 editWindow.Owner = this;
                 editWindow.ShowDialog();
@@ -238,6 +236,7 @@ namespace Password_and_Note_Manager
             }
         }
 
+        // 7. Logout and return to the login screen, clearing the current vault session
         private void BtnLogout_Click(object sender, RoutedEventArgs e)
         {
             var result = MessageBox.Show("Deseja fechar o cofre atual e voltar à tela de login?",
@@ -256,11 +255,12 @@ namespace Password_and_Note_Manager
             }
         }
 
+        // 8. Save changes and synchronize with the cloud if applicable
         private void SaveChangesAndSync()
         {
-            LoadCredentials(); // Atualiza a interface local
+            LoadCredentials(); // Update the local interface
 
-            // Dispara o upload para a nuvem em segundo plano apenas quando há alterações
+            // Upload the database backup to the cloud in the background only when there are changes
             Task.Run(async () =>
             {
                 string localPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, DatabaseHelper.CurrentDbName);

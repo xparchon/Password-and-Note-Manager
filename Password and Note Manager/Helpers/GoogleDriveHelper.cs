@@ -21,7 +21,7 @@ namespace Password_and_Note_Manager.Helpers
 
         private static string _cachedAccessToken;
 
-        // 1. Autenticar o utilizador com a Conta Google (utilizando a janela pop-up WebView2 existente)
+        // 1. Google authentication (utilizing pop-up window with existent WebView2)
         public static async Task<string> LoginAndGetAccessTokenAsync()
         {
             if (!string.IsNullOrEmpty(_cachedAccessToken))
@@ -91,7 +91,7 @@ namespace Password_and_Note_Manager.Helpers
             return null;
         }
 
-        // 2. Fazer Upload do Ficheiro de Cofre para o Google Drive
+        // 2. Upload backup file to Google Drive
         public static async Task<bool> UploadBackupToGoogleDriveAsync(string localDbPath)
         {
             try
@@ -104,7 +104,7 @@ namespace Password_and_Note_Manager.Helpers
                 string fileName = Path.GetFileName(localDbPath);
                 string tempUploadPath = localDbPath + ".upload";
 
-                // Copia o ficheiro ativo de forma segura para evitar conflito de lock com o SQLite WAL
+                // Copy the active file securely to avoid lock conflicts with SQLite WAL
                 File.Copy(localDbPath, tempUploadPath, true);
 
                 byte[] fileBytes;
@@ -124,7 +124,7 @@ namespace Password_and_Note_Manager.Helpers
                 {
                     httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-                    // Procura o ID do ficheiro dinamicamente pelo nome (ex: vault_gdrive.db)
+                    // Search for the file ID dynamically by name (e.g., vault_gdrive.db)
                     string encodedFileName = Uri.EscapeDataString(fileName);
                     string searchUrl = $"https://www.googleapis.com/drive/v3/files?q=name%3D%27{encodedFileName}%27%20and%20trashed%3Dfalse";
 
@@ -137,7 +137,7 @@ namespace Password_and_Note_Manager.Helpers
 
                     if (files.GetArrayLength() > 0)
                     {
-                        // Ficheiro já existe: Atualizar conteúdo (PATCH)
+                        // File already exists: Update content (PATCH)
                         string fileId = files[0].GetProperty("id").GetString();
                         string updateUrl = $"https://www.googleapis.com/upload/drive/v3/files/{fileId}?uploadType=media";
 
@@ -150,14 +150,14 @@ namespace Password_and_Note_Manager.Helpers
                     }
                     else
                     {
-                        // Ficheiro não existe: Criar novo ficheiro com upload multipart (POST)
+                        // File does not exist: Create new file with multipart upload (POST)
                         return await CreateNewFileMultipartAsync(httpClient, fileBytes, fileName);
                     }
                 }
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show($"Erro ao enviar backup para o Google Drive: {ex.Message}", "Erro Cloud", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                System.Windows.MessageBox.Show($"Error uploading backup to Google Drive: {ex.Message}", "Cloud Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
                 return false;
             }
         }
@@ -192,7 +192,7 @@ namespace Password_and_Note_Manager.Helpers
             return response.IsSuccessStatusCode;
         }
 
-        // 3. Fazer Download do Ficheiro de Cofre do Google Drive para o PC local
+        // 3. Download backup file from Google Drive to local PC
         public static async Task<bool> DownloadBackupFromGoogleDriveAsync(string localDestinationPath)
         {
             try
@@ -218,7 +218,7 @@ namespace Password_and_Note_Manager.Helpers
 
                     if (files.GetArrayLength() == 0)
                     {
-                        return false; // O ficheiro ainda não existe na nuvem
+                        return false; // File does not exist in the cloud
                     }
 
                     string fileId = files[0].GetProperty("id").GetString();
@@ -232,7 +232,7 @@ namespace Password_and_Note_Manager.Helpers
                         string tempVaultPath = localDestinationPath + ".tmp";
                         await File.WriteAllBytesAsync(tempVaultPath, fileBytes);
 
-                        // Substitui o cofre local de forma segura
+                        // Replace the local vault securely
                         if (File.Exists(localDestinationPath))
                         {
                             File.Delete(localDestinationPath);
@@ -250,7 +250,7 @@ namespace Password_and_Note_Manager.Helpers
             return false;
         }
 
-        // 4. Sincroniza o cofre local com o Google Drive baseando-se na data de modificação (idêntico ao OneDrive)
+        // 4. Synchronize the local vault with Google Drive based on modification date
         public static async Task SynchronizeVaultAsync(string localDbPath)
         {
             string accessToken = await LoginAndGetAccessTokenAsync();
@@ -300,19 +300,20 @@ namespace Password_and_Note_Manager.Helpers
                 DateTime localTime = File.GetLastWriteTimeUtc(localDbPath);
                 DateTimeOffset localTimeUtc = new DateTimeOffset(localTime, TimeSpan.Zero);
 
-                // Adicionamos uma margem de tolerância de 3 segundos para evitar conflitos de relógio de rede/sistema
+                // Secure margin to avoid system conflicts - a margin of tolerance of 3 seconds to avoid network/system clock conflicts
                 if (remoteTime > localTimeUtc.AddSeconds(3))
                 {
                     await DownloadBackupFromGoogleDriveAsync(localDbPath);
                 }
                 else
                 {
-                    // Se o local for igual ou mais recente, garante o envio imediato para a nuvem
+                    // If the local file is equal to or more recent, ensure immediate upload to the cloud
                     await UploadBackupToGoogleDriveAsync(localDbPath);
                 }
             }
         }
 
+        // 5. Retrieve the user's email from Google Drive for account verification
         public static async Task<string> GetUserEmailAsync()
         {
             try

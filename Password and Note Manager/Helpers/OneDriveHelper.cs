@@ -1,6 +1,5 @@
 ﻿using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Desktop;
-using Password_and_Note_Manager.Views;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -11,7 +10,7 @@ namespace Password_and_Note_Manager.Helpers
     public static class OneDriveHelper
     {
         private static readonly string ClientId = Environment.GetEnvironmentVariable("ONEDRIVE_CLIENT_ID")
-            ?? throw new InvalidOperationException("A variável de ambiente ONEDRIVE_CLIENT_ID não foi configurada.");
+            ?? throw new InvalidOperationException("The environment variable ONEDRIVE_CLIENT_ID is not configured.");
         private static readonly string[] Scopes = { "Files.ReadWrite", "User.Read" };
 
         private static IPublicClientApplication _pca;
@@ -28,6 +27,7 @@ namespace Password_and_Note_Manager.Helpers
             return _pca;
         }
 
+        // 1. Login to OneDrive and get the access token
         public static async Task<string> LoginAndGetAccessTokenAsync()
         {
             var pca = GetPublicClient();
@@ -54,6 +54,7 @@ namespace Password_and_Note_Manager.Helpers
             return result?.AccessToken;
         }
 
+        // 2. Acquire token interactively with embedded web view
         private static async Task<AuthenticationResult> AcquireInteractiveWithParentAsync(IPublicClientApplication pca)
         {
             return await pca.AcquireTokenInteractive(Scopes)
@@ -61,7 +62,7 @@ namespace Password_and_Note_Manager.Helpers
                 .ExecuteAsync();
         }
 
-        // 1. Fazer Upload do Ficheiro `vault_onedrive_user_com.db` para a pasta isolada da app no OneDrive
+        // 3. Upload the `vault_onedrive_user_com.db` file to the isolated folder in OneDrive
         public static async Task<bool> UploadBackupToOneDriveAsync(string localDbPath)
         {
             try
@@ -91,10 +92,10 @@ namespace Password_and_Note_Manager.Helpers
                 using (var httpClient = new HttpClient())
                 {
                     httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-                    // Obtém o nome exato do cofre atual (ex: vault_onedrive_user_com.db)
+                    // Get the exact dynamic vault name (ex: vault_onedrive_user_com.db)
                     string fileName = Path.GetFileName(localDbPath);
 
-                    // Utiliza a variável no URL do Microsoft Graph
+                    // Utilize the variable in the Microsoft Graph URL
                     string url = $"https://graph.microsoft.com/v1.0/me/drive/special/approot:/{fileName}:/content";
 
                     using (var content = new ByteArrayContent(fileBytes))
@@ -112,7 +113,7 @@ namespace Password_and_Note_Manager.Helpers
             }
         }
 
-        // 2. Fazer Download do Ficheiro `vault_onedrive_user_com.db` da pasta isolada da app no OneDrive para o PC local
+        // 4. Download the `vault_onedrive_user_com.db` file from the isolated folder in OneDrive to the local PC
         public static async Task<bool> DownloadBackupFromOneDriveAsync(string localDestinationPath)
         {
             try
@@ -143,14 +144,14 @@ namespace Password_and_Note_Manager.Helpers
                     return false;
                 }
 
-                // Obtém o nome exato do cofre dinâmico (ex: vault_onedrive_user_com.db)
+                // Get the exact dynamic vault name (ex: vault_onedrive_user_com.db)
                 string fileName = Path.GetFileName(localDestinationPath);
 
                 using (var httpClient = new System.Net.Http.HttpClient())
                 {
                     httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", result.AccessToken);
 
-                    // Endpoint do OneDrive utilizando o nome dinâmico na pasta approot
+                    // OneDrive endpoint utilizing the dynamic name in the approot folder
                     string graphUrl = $"https://graph.microsoft.com/v1.0/me/drive/special/approot:/{fileName}:/content";
 
                     var response = await httpClient.GetAsync(graphUrl);
@@ -171,7 +172,7 @@ namespace Password_and_Note_Manager.Helpers
                     }
                     else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
                     {
-                        // O ficheiro ainda não existe na nuvem (primeiro acesso)
+                        // The file does not exist in the cloud (first access)
                         return false;
                     }
                 }
@@ -184,7 +185,7 @@ namespace Password_and_Note_Manager.Helpers
             return false;
         }
 
-        // 3. Sincroniza o cofre local com o OneDrive
+        // 5. Synchronize the local vault with OneDrive
         public static async Task SynchronizeVaultAsync(string localDbPath)
         {
             string accessToken = await LoginAndGetAccessTokenAsync();
@@ -194,7 +195,7 @@ namespace Password_and_Note_Manager.Helpers
             bool remoteExists = false;
             DateTimeOffset remoteTime = DateTimeOffset.MinValue;
 
-            // Extrai o nome do ficheiro atual para garantir que o OneDrive procura pelo ficheiro correto na pasta approot
+            // Extract the current file name to ensure OneDrive searches for the correct file in the approot folder
             string fileName = Path.GetFileName(localDbPath);
 
             using (var httpClient = new HttpClient())
@@ -253,6 +254,7 @@ namespace Password_and_Note_Manager.Helpers
             }
         }
 
+        // 6. Retrieve the user's email from OneDrive for account verification
         public static async Task<string> GetUserEmailAsync()
         {
             try

@@ -8,7 +8,7 @@ namespace Password_and_Note_Manager.Views
     public partial class AddCredentialWindow : Window
     {
         private string _masterKey;
-        // Propriedade pública para indicar à MainWindow se alguma credencial foi salva
+        // public property for indicating to MainWindow if any credential was saved
         public bool HasAddedCredentials { get; private set; } = false;
 
         public AddCredentialWindow(string masterKey)
@@ -17,22 +17,22 @@ namespace Password_and_Note_Manager.Views
             _masterKey = masterKey;
         }
 
-        // Fecha a janela sem salvar nada
+        // Closes the window without saving anything
         private void BtnCancel_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
         }
 
-        // Processa, criptografa e salva os dados no SQLite
+        // Processes, encrypts, and saves the data in SQLite
         private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
             string title = txtTitle.Text.Trim();
             string url = txtUrl.Text.Trim();
             string username = txtUsername.Text.Trim();
-            string password = txtPassword.Text; // Mantém espaços se houver na senha
+            string password = txtPassword.Text; // Maintains spaces if present in the password
             string notes = txtNotes.Text.Trim();
 
-            // Validação simples de campos obrigatórios
+            // Simple validation of required fields
             if (string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
             {
                 MessageBox.Show("Title, Username, and Password are required fields.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -41,10 +41,10 @@ namespace Password_and_Note_Manager.Views
 
             try
             {
-                // CRIPTOGRAFIA: Tranca a senha usando AES-256 e a chave mestre obtida no login
+                // Cryptography: Lock the password using AES-256 and the master key obtained at login
                 string encryptedPassword = CryptoHelper.Encrypt(password, _masterKey);
 
-                // Gravação segura no banco de dados SQLite
+                // Secure writing to the SQLite database
                 using (var connection = DatabaseHelper.GetConnection())
                 {
                     string query = @"
@@ -63,21 +63,21 @@ namespace Password_and_Note_Manager.Views
                     }
                 }
 
-                // Marca que foi adicionada pelo menos uma credencial na sessão
+                // Mark that at least one credential was added in the session
                 HasAddedCredentials = true;
 
-                // Limpa os campos para o próximo cadastro em massa
+                // Clear the fields for the next bulk registration
                 txtTitle.Clear();
                 txtUrl.Clear();
                 txtUsername.Clear();
                 txtPassword.Clear();
                 txtNotes.Clear();
-                txtTitle.Focus(); // Retorna o foco para o primeiro campo
+                txtTitle.Focus(); // Returns the focus to the first field
 
-                // Exibe o aviso verde subtil na interface
+                // Display the subtle green alert in the interface
                 txtSuccessMessage.Visibility = Visibility.Visible;
 
-                // Faz o aviso desaparecer automaticamente após 3 segundos
+                // Configure alert message to disappear automatically after 3 seconds
                 Task.Delay(3000).ContinueWith(_ =>
                 {
                     Dispatcher.Invoke(() => {
@@ -94,19 +94,19 @@ namespace Password_and_Note_Manager.Views
         {
             try
             {
-                // Gera uma senha segura de 16 caracteres usando o helper que criámos
+                // Generates a secure password of 16 characters using the helper we created
                 string generatedPassword = Password_and_Note_Manager.Helpers.PasswordGeneratorHelper.GeneratePassword(16);
 
-                // Preenche a TextBox com a senha gerada
+                // Fills the TextBox with the generated password
                 txtPassword.Text = generatedPassword;
 
-                // Copia automaticamente para a área de transferência do Windows
+                // Copies the generated password to the Windows clipboard
                 Clipboard.SetText(generatedPassword);
 
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erro ao gerar senha: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Error generating password: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }
